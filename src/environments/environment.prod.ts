@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://dummyjson.com'
+  apiUrl: 'https://us-central1-challengetask-bdfd6.cloudfunctions.net/api/api'
 };
