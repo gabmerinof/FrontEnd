@@ -51,7 +51,7 @@
         (deleteTask)="deleteTaskHandler($event)"></app-task-list-card>
     </div>
     }@else{
-    <div *ngIf="completedTasksCount > 0">
+    <div *ngIf="!isLoading && completedTasksCount > 0">
       <app-task-list-card (toggleTaskCompletion)="toggleTaskCompletion($event)"
         [tasks]="completedTasks"></app-task-list-card>
     </div>

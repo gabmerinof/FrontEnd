@@ -4,7 +4,7 @@ import { ApiService } from './api.service';
 import { User, UserResponse, ApiResponse } from '../models/api.models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -21,17 +21,15 @@ export class AuthService {
   }
 
   login(email: string): Observable<ApiResponse<UserResponse>> {
-    return this.apiService.post<ApiResponse<UserResponse>>(
-      '/users/find-or-create',
-      { email }
-    ).pipe(
-      tap(response => {
-        if (response.success && response.data) {
-          this.setCurrentUser(response.data.user);
-        }
-      },
-      )
-    );
+    return this.apiService
+      .post<ApiResponse<UserResponse>>('/users/find-or-create', { email })
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data) {
+            this.setCurrentUser(response.data.user);
+          }
+        })
+      );
   }
 
   checkUserExists(email: string): Observable<ApiResponse<{ exists: boolean; user: User }>> {

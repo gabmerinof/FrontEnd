@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse, CreateTaskRequest, TaskResponse, TasksResponse, UpdateTaskRequest } from '../models/api.models';
 import { ApiService } from './api.service';
@@ -7,7 +7,7 @@ import { ApiService } from './api.service';
   providedIn: 'root'
 })
 export class TaskService {
-  constructor(private apiService: ApiService) { }
+  private apiService: ApiService = inject(ApiService);
 
   getUserTasks(userId: string, first:string, row: string): Observable<ApiResponse<TasksResponse>> {
     return this.apiService.get<ApiResponse<TasksResponse>>(`/tasks/user/${userId}/${first}/${row}`);
@@ -30,6 +30,7 @@ export class TaskService {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
+
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'short',

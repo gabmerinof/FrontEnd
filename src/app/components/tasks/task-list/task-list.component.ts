@@ -19,7 +19,7 @@ import { RippleModule } from 'primeng/ripple';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TooltipModule } from 'primeng/tooltip';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { catchError, switchMap, takeUntil } from 'rxjs/operators';
 import { CreateTaskRequest, Task } from '../../../core/models/api.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { TaskService } from '../../../core/services/task.service';
@@ -40,6 +40,7 @@ export class TaskListComponent implements OnInit, OnDestroy {
   tasks: Task[] = [];
 
   private destroy$ = new Subject<void>();
+  private getAllTask$: Subject<string> = new Subject<string>();
   private taskService: TaskService = inject(TaskService);
   private confirmationService: ConfirmationService = inject(ConfirmationService);
   private authService: AuthService = inject(AuthService);
@@ -57,80 +58,114 @@ export class TaskListComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
   selectedTask: Task | null = null;
 
+  constructor() {
+    /**
+    * Configura el flujo reactivo para la carga de tareas
+    * Utiliza un Subject para manejar las solicitudes de obtención de tareas
+    */
+    this.getAllTask$.pipe(
+      takeUntil(this.destroy$),
+      /**
+      * Obtiene las tareas del usuario actual con paginación
+      * @param userId - ID del usuario autenticado
+      * @param first - Índice del primer elemento a cargar
+      * @param rows - Número de filas por página
+      */
+      switchMap(() => this.taskService.getUserTasks(this.currentUser!.id, this.first.toString(), this.rows.toString())),
+      catchError((error, originalObs) => {
+        console.log(error);
+        this.isLoading = false;
+        this.snackBar.open(
+          'Error de conexión. Intenta nuevamente.',
+          'Cerrar',
+          { duration: 5000 }
+        );
+
+        return originalObs;
+      })
+    ).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success && response.data) {
+          this.isPending = true;
+          this.tasks = response.data.tasks;
+          this.totalCount = response.data.count;
+
+          /**
+         * Configura los items del menú de filtrado (Pendientes/Completadas)
+         * Incluye badges con el conteo actual de tareas en cada categoría
+         */
+          this.items = [
+            {
+              label: 'Pendientes',
+              icon: 'pi pi-calendar-clock',
+              styleClass: 'my-highlight-class',
+              badge: this.pendingTasksCount.toString(),
+              command: () => {
+                this.isPending = true;
+                this.items[0].styleClass = 'my-highlight-class';
+                this.items[1].styleClass = '';
+              }
+            },
+            {
+              label: 'Completadas',
+              icon: 'pi pi-calendar',
+              badge: this.completedTasksCount.toString(),
+              command: () => {
+                this.isPending = false;
+                this.items[0].styleClass = '';
+                this.items[1].styleClass = 'my-highlight-class';
+              }
+            }
+          ]
+        } else {
+          this.snackBar.open(
+            response.error || 'Error al cargar las tareas',
+            'Cerrar',
+            { duration: 5000 }
+          );
+        }
+      }
+    });
+  }
+
+  /**
+ * Verifica la autenticación del usuario y carga las tareas
+ */
   ngOnInit(): void {
     if (!this.currentUser) {
       this.router.navigate(['/login']);
       return;
     }
 
-    setTimeout(() => {
-      this.loadTasks();
-    }, 500);
+    // Carga las tareas con un pequeño delay para asegurar la renderización
+    setTimeout(() => this.loadTasks(), 50);
   }
 
+  /**
+ * Limpia las suscripciones para prevenir memory leaks
+ */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+  * Inicia el proceso de carga de tareas
+  * Activa el estado de carga y dispara el Subject de obtención de tareas
+  */
   loadTasks(): void {
     this.isLoading = true;
-    this.taskService.getUserTasks(this.currentUser!.id, this.first.toString(), this.rows.toString())
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success && response.data) {
-            this.tasks = response.data.tasks;
-            this.totalCount = response.data.count;
-
-            this.items = [
-              {
-                label: 'Pendientes',
-                icon: 'pi pi-calendar-clock',
-                styleClass: 'my-highlight-class',
-                badge: this.pendingTasksCount.toString(),
-                command: () => {
-                  this.isPending = true;
-                  this.items[0].styleClass = 'my-highlight-class';
-                  this.items[1].styleClass = '';
-                }
-              },
-              {
-                label: 'Completadas',
-                icon: 'pi pi-calendar',
-                badge: this.completedTasksCount.toString(),
-                command: () => {
-                  this.isPending = false;
-                  this.items[0].styleClass = '';
-                  this.items[1].styleClass = 'my-highlight-class';
-                }
-              }
-            ]
-          } else {
-            this.snackBar.open(
-              response.error || 'Error al cargar las tareas',
-              'Cerrar',
-              { duration: 5000 }
-            );
-          }
-        },
-        error: (error) => {
-          console.log(error);
-          this.isLoading = false;
-          this.snackBar.open(
-            'Error de conexión. Intenta nuevamente.',
-            'Cerrar',
-            { duration: 5000 }
-          );
-        }
-      });
+    this.getAllTask$.next('');
   }
 
+  /**
+ * Maneja el envío del formulario de tarea (creación o edición)
+ * @param taskForm - FormGroup con los datos de la tarea
+ */
   onSubmit(taskForm: FormGroup): void {
     if (taskForm.valid && this.currentUser) {
       this.isSubmitting = true;
-      console.log(this.selectedTask);
 
       if (this.selectedTask) {
         this.selectedTask.title = taskForm.get('title')?.value.trim();
@@ -141,26 +176,46 @@ export class TaskListComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+ * Maneja el cambio de página en la paginación
+ * @param event - Evento de cambio de página con información de paginación
+ */
   onPageChange(event: any) {
     this.first = event.first;
     this.loadTasks();
   }
 
+  /**
+ * Alterna el estado de completado/pendiente de una tarea
+ * @param task - Tarea a modificar
+ */
   toggleTaskCompletion(task: Task): void {
     const updatedTask = { ...task, completed: !task.completed };
     this.updateTask(updatedTask);
   }
 
+  /**
+  * Muestra el diálogo para crear una nueva tarea
+  * Reinicia la tarea seleccionada para modo creación
+  */
   showDialogEdit() {
     this.selectedTask = null;
     this.dialogVisible = true;
   }
 
+  /**
+ * Muestra el diálogo para editar una tarea existente
+ * @param event - Tarea seleccionada para edición
+ */
   clickOnEdit(event: Task) {
     this.selectedTask = event;
     this.dialogVisible = true;
   }
 
+  /**
+  * Crea una nueva tarea en el sistema
+  * @param taskForm - FormGroup con los datos de la nueva tarea
+  */
   createTask(taskForm: FormGroup) {
     const taskData: CreateTaskRequest = {
       title: taskForm.get('title')?.value.trim(),
@@ -206,6 +261,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+ * Actualiza una tarea existente en el sistema
+ * @param task - Tarea con los datos actualizados
+ */
   updateTask(task: Task): void {
     const updateData = {
       title: task.title,
@@ -254,6 +313,11 @@ export class TaskListComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+  * Maneja la solicitud de eliminación de una tarea
+  * Muestra un diálogo de confirmación antes de proceder
+  * @param event - Evento que contiene la tarea a eliminar
+  */
   deleteTaskHandler(event: any) {
     this.confirmationService.confirm({
       target: event!.button,
@@ -293,27 +357,52 @@ export class TaskListComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+  * Cierra la sesión del usuario y redirige al login
+  */
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
+  /**
+ * Obtiene el número de tareas pendientes
+ * @returns Número de tareas no completadas
+ */
   get pendingTasksCount(): number {
     return this.tasks.filter(t => !t.completed).length;
   }
 
+  /**
+ * Obtiene el número de tareas completadas
+ * @returns Número de tareas completadas
+ */
   get completedTasksCount(): number {
     return this.tasks.filter(t => t.completed).length;
   }
 
+  /**
+ * Obtiene la lista de tareas completadas
+ * @returns Array de tareas completadas
+ */
   get completedTasks(): Task[] {
     return this.tasks.filter(t => t.completed);
   }
 
+  /**
+  * Obtiene la lista de tareas pendientes
+  * @returns Array de tareas no completadas
+  */
   get pendingTasks(): Task[] {
     return this.tasks.filter(t => !t.completed);
   }
 
+  /**
+ * Función de trackBy para optimizar el rendering de la lista de tareas
+ * @param index - Índice del elemento en el array
+ * @param task - Tarea actual
+ * @returns Identificador único de la tarea
+ */
   trackByTaskId(index: number, task: Task): string {
     return task.id;
   }

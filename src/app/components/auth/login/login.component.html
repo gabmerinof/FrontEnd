@@ -1,3 +1,20 @@
+<p-confirmDialog #cd>
+  <ng-template pTemplate="headless" let-message>
+    <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+      <span class="font-bold text-2xl block mb-2 mt-4">
+        {{ message.header }}
+      </span>
+      <p class="mb-0">{{ message.message }}</p>
+      <div class="flex align-items-center gap-2 mt-4">
+        <button pButton label="Crear" (click)="cd.accept()" class="w-8rem">
+        </button>
+        <button pButton label="Cancelar" (click)="cd.reject()" class="p-button-outlined w-8rem ">
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+
 <div class="login-container">
   <mat-card class="login-card" style="border-radius: 14px;">
     <mat-card-header style="width: 100%; padding-bottom: 34px;">
@@ -11,7 +28,7 @@
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Correo Electrónico</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="tu@email.com" (blur)="checkUserExists()"
+          <input matInput type="email" formControlName="email" placeholder="tu@email.com"
             [class.mat-form-field-invalid]="email?.invalid && email?.touched">
 
           <mat-icon matPrefix>email</mat-icon>

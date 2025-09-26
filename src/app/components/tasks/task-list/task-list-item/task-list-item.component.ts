@@ -22,19 +22,39 @@ export class TaskListItemComponent {
 
   private taskService: TaskService = inject(TaskService);
 
+  /**
+ * Maneja el evento de eliminación de una tarea
+ * Prepara los datos y emite el evento al componente padre para su procesamiento
+ * @param event - Evento DOM original disparado por el botón de eliminar
+ * @emits deleteTask - Emite un objeto con la tarea actual y el elemento que disparó el evento
+ */
   deleteItemTask(event: Event) {
     this.deleteTask.emit({ tasks: this.task, button: event.target });
   }
 
+  /**
+ * Alterna el estado de completado de la tarea actual
+ * Emite el evento al componente padre para actualizar el estado en el servidor
+ * @emits toggleTaskCompletion - Emite la tarea actual para cambiar su estado
+ */
   toggleTask(): void {
     this.toggleTaskCompletion.emit(this.task!);
   }
 
+  /**
+ * Formatea una fecha string para su visualización amigable
+ * Utiliza el servicio TaskService para aplicar el formato consistente
+ */
   formatDate(dateString?: string): string {
 
     return dateString ? this.taskService.formatDate(dateString) : dateString ?? "";
   }
 
+  /**
+ * Inicia el proceso de edición de la tarea actual
+ * Emite el evento al componente padre para abrir el diálogo de edición
+ * @emits editTask - Emite la tarea actual para su edición
+ */
   clickOnEdit() {
     this.editTask.emit(this.task);
   }
