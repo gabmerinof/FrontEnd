@@ -1,0 +1,90 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+  background-image: url('../../../../assets/images/bg-01.jpg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+::ng-deep .mat-mdc-card-title {
+  text-align: center;
+}
+
+::ng-deep .mat-mdc-card-header-text {
+  width: 100% !important;
+  padding-bottom: 14px !important;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  opacity: 0.8;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.submit-button {
+  height: 48px;
+  font-size: 1.1rem;
+
+  mat-spinner {
+    margin: 0 auto;
+  }
+}
+
+.hint-text {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .login-container {
+    padding: 0.5rem;
+  }
+}
+
+.title-chrome {
+  background: linear-gradient(45deg, #e6e6fa, #c0c0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.title-neon {
+  background: linear-gradient(45deg, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+  animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+  0% {
+    filter: brightness(1);
+  }
+
+  100% {
+    filter: brightness(1.3);
+  }
+}

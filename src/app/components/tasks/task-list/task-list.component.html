@@ -1,0 +1,65 @@
+<div class="task-list-container">
+  <div class="header">
+    <div class="header-content">
+      <h1 class="mat-headline-4">Mis Tareas</h1>
+      <div class="user-info">
+        <span class="user-email">{{ currentUser?.email }}</span>
+        <button type="button" pButton (click)="logout()" icon="pi pi-power-off"
+          style="margin-left:.25em; border-radius: 50%;"></button>
+      </div>
+    </div>
+  </div>
+  <p-menubar [model]="items">
+    <ng-template pTemplate="start">
+      <p-toolbar>
+        <div class="p-toolbar-group-start">
+          <button pButton icon="pi pi-refresh" pTooltip="Refrescar" (click)="loadTasks()" tooltipPosition="top"
+            class="mr-2" style="margin-left:.25em; border-radius: 50%;"></button>
+          <button pButton icon="pi pi-plus" pTooltip="Nuevo" (click)="showDialogEdit()" tooltipPosition="top"
+            class="mr-2" style="margin-left:.25em; border-radius: 50%;"></button>
+        </div>
+      </p-toolbar>
+    </ng-template>
+    <ng-template pTemplate="item" let-item let-root="root">
+      <a pRipple class="flex align-items-center p-menuitem-link">
+        <span [class]="item.icon"></span>
+        <span class="ml-2 text-primary font-bold">{{ item.label }}</span>
+        <p-badge *ngIf="item.badge" class="ml-auto, badgetClass" [value]="item.badge" />
+      </a>
+    </ng-template>
+    <ng-template pTemplate="end">
+      <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="totalCount" />
+    </ng-template>
+  </p-menubar>
+
+  <div class="tasks-section">
+    <div *ngIf="isLoading" class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando tareas...</p>
+    </div>
+
+    <div *ngIf="!isLoading && tasks.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">assignment</mat-icon>
+      <h3>No hay tareas</h3>
+      <p>Comienza agregando tu primera tarea arriba.</p>
+    </div>
+
+    @if(isPending){
+    <div *ngIf="!isLoading && tasks.length > 0">
+      <app-task-list-card [tasks]="pendingTasks" (editTask)="clickOnEdit($event)"
+        (toggleTaskCompletion)="toggleTaskCompletion($event)"
+        (deleteTask)="deleteTaskHandler($event)"></app-task-list-card>
+    </div>
+    }@else{
+    <div *ngIf="completedTasksCount > 0">
+      <app-task-list-card (toggleTaskCompletion)="toggleTaskCompletion($event)"
+        [tasks]="completedTasks"></app-task-list-card>
+    </div>
+    }
+  </div>
+</div>
+
+@if(dialogVisible){
+<app-task-list-item-add [task]="selectedTask" (submitGroupForm)="onSubmit($event)"
+  [(dialogItemVisible)]="dialogVisible"></app-task-list-item-add>
+}

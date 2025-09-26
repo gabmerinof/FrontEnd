@@ -1,0 +1,10 @@
+<p-confirmPopup></p-confirmPopup>
+
+<div class="tasks-grid">
+  <mat-card *ngFor="let task of tasks; trackBy: trackByTaskId" class="task-card" [class.completed]="task.completed">
+    <mat-card-content>
+      <app-task-list-item [task]="task" class="list-item" (editTask)="clickOnEdit($event)"
+        (toggleTaskCompletion)="toggleTask($event)" (deleteTask)="deleteItemTask($event)"></app-task-list-item>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,24 @@
+<p-dialog [(visible)]="dialogItemVisible" [style]="{width: '450px'}" header="{{dialogTitle}}" [modal]="true"
+  class="p-fluid">
+  @if(taskForm !== null){
+  <p-card class="flex justify-content-center">
+    <form [formGroup]="taskForm!" (ngSubmit)="onSubmit()">
+      <p-floatLabel>
+        <input id="txtTitle" type="text" pInputText formControlName="title" />
+        <label for="txtTitle" class="block">Título</label>
+      </p-floatLabel>
+
+      <br /> <br />
+      <p-floatLabel>
+        <input type="text" pInputText formControlName="description" />
+        <label for="description" class="block">Descripción</label>
+      </p-floatLabel>
+
+      <br />
+      <button pButton type="submit" icon="pi pi-check" label="Guardar" style="width: 40%;float: right;"
+        [disabled]="taskForm!.invalid"></button>
+      <br />
+    </form>
+  </p-card>
+  }
+</p-dialog>
