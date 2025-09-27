@@ -21,7 +21,7 @@ Frontend desarrollado con Angular 17.3.4 para el sistema de gestión de tareas, 
 - [Despliegue](#despliegue)
 - [API Integration](#api-integration)
 
-🚀##Características
+## 🚀 Características
 
 - **Angular 17.3.4** con standalone components y signals
 - **Arquitectura modular** y escalable
