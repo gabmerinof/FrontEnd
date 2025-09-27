@@ -31,7 +31,9 @@ Frontend desarrollado con Angular 17.3.4 para el sistema de gestión de tareas, 
 
 ## 🎯 Demo
 
-**URL de producción:** [https://front-end-flame-six-18.vercel.app/](https://front-end-flame-six-18.vercel.app/)
+**URL de producción:** 
+[https://front-end-flame-six-18.vercel.app/](https://front-end-flame-six-18.vercel.app/)
+
 ![32ecdfe0-14a9-4dae-9756-a8f614086fdb](https://github.com/user-attachments/assets/696b856f-21c7-498b-9f65-23510b619b2e)
 ![bce44979-2aca-4e4e-a708-87e39bb2c562](https://github.com/user-attachments/assets/7119391b-773f-43fc-a832-c40ebeb569aa)
 ![6584982d-f2c8-4f27-8acf-14da51d7f750](https://github.com/user-attachments/assets/805ca9db-0ea4-4132-856c-8d3ae2d952b1)
