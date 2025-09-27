@@ -77,7 +77,8 @@ npm install
 
 3. Configurar Variables de Entorno
 
-Editar src/environments/environment.ts:
+Editar src/environments/environment.ts
+
 Desarrollo Backend Local
 ```typescript
 export const environment = {
